@@ -25,6 +25,7 @@
 # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
+import init.qcom.power.rc
 import init.qcom.usb.rc
 import init.target.rc
 
@@ -282,9 +283,12 @@ on post-fs-data
     mkdir /data/misc/SelfHost/Running/ 2750 system shell
     mkdir /data/misc/SelfHost/socket/ 2770 system system
 
-    #Create FM dir for patchdownloader
+    # Create FM dir for patchdownloader
     mkdir /data/misc/fm 0770 system system
     chmod 0770 /data/misc/fm
+
+    # Fingerprint
+    mkdir /data/fpc 0700 system system
 
     mkdir /data/tombstones 0771 system system
     mkdir /tombstones/modem 0771 system system
@@ -391,6 +395,13 @@ service btsnoop /system/bin/btsnoop
    class late_start
    disabled
    oneshot
+
+# FM
+on property:hw.fm.init=0
+    write /sys/module/radio_iris_transport/parameters/fmsmd_set 0
+
+on property:hw.fm.init=1
+    write /sys/module/radio_iris_transport/parameters/fmsmd_set 1
 
 # QMUX must be in multiple groups to support external process connections
 service qmuxd /system/bin/qmuxd
@@ -519,11 +530,6 @@ on property:crypto.driver.load=1
      insmod /system/lib/modules/qce.ko
      insmod /system/lib/modules/qcedev.ko
 
-service qcom-post-boot /system/bin/sh /system/etc/init.qcom.post_boot.sh
-    class late_start
-    user root
-    oneshot
-
 service hostapd /system/bin/hostapd -dd /data/hostapd/hostapd.conf
     class late_start
     user root
@@ -557,6 +563,7 @@ service qcamerasvr /system/bin/mm-qcamera-daemon
     class late_start
     user camera
     group camera system inet input graphics
+    writepid /dev/cpuset/system-background/tasks
 
 service qseecomd /system/bin/qseecomd
    class core
@@ -567,6 +574,7 @@ service perfd /system/vendor/bin/perfd
    class main
    user root
    disabled
+   writepid /dev/cpuset/system-background/tasks
 
 service thermal-engine /system/vendor/bin/thermal-engine
    class main
@@ -663,7 +671,6 @@ on property:persist.sys.display_eyecare=4
     write /sys/class/graphics/fb0/msm_fb_eyecare 8
 
 on charger
-    start qcom-post-boot
     start hvdcp_opti
 
 service per_mgr /system/bin/pm-service
@@ -685,6 +692,7 @@ service msm_irqbal_lb /system/bin/msm_irqbalance -f /system/vendor/etc/msm_irqba
     user root
     group root
     disabled
+    writepid /dev/cpuset/system-background/tasks
 
 service imsqmidaemon /system/bin/imsqmidaemon
     class main
@@ -719,10 +727,10 @@ on property:sys.ims.DATA_DAEMON_STATUS=1
     start ims_rtp_daemon
     start imscmservice
 
-service fpcd /system/bin/fpcd
-    socket fpcd stream 0666 system system
-    seclabel u:r:fpcd:s0
+service fingerprintd /system/bin/fingerprintd
     class late_start
+    socket fpce stream 0666 system system
+    user system
 
 on property:persist.sys.runin=enable
     write /sys/class/power_supply/battery/device/BatteryTestStatus 1

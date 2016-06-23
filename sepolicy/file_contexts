@@ -1,8 +1,6 @@
 # IR Blaster
 /dev/lirc[0-9]*                                                       u:object_r:lirc_device:s0
 
-# Cache filesystem
-
 # Fingerprint
 /dev/socket/fpce                                                      u:object_r:fpc_socket:s0
 /data/fpc(/.*)?                                                       u:object_r:fpc_data_file:s0

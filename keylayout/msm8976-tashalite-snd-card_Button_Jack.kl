@@ -1,3 +1,9 @@
+<<<<<<< HEAD
 key 226    HEADSETHOOK    WAKE
 key 257    VOLUME_UP      WAKE
 key 258    VOLUME_DOWN    WAKE
+=======
+key 226    HEADSETHOOK
+key 257    VOLUME_UP
+key 258    VOLUME_DOWN
+>>>>>>> 713238a467cb519ba27a989472df4ee78a5aaf44

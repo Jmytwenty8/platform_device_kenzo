@@ -1,2 +1,2 @@
 PRODUCT_MAKEFILES := \
-  $(LOCAL_DIR)/aosp_kenzo.mk
+  $(LOCAL_DIR)/validus.mk
